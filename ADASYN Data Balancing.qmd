@@ -1,7 +1,7 @@
 ---
 title: "Group 2 Data Balancing"
 format: html
-editor: Zeqianxi Xiao
+editor: 'Zeqianxi Xiao'
 ---
 
 ## Quarto
@@ -95,7 +95,7 @@ library('smotefamily')
 ```
 
 ```{r}
-ADASYN_rslt <- ADAS(data, target = data$y, K = 3)
+ADASYN_rslt <- ADAS(data, target = data$y, K = 9)
 
 #ADASYN_dataset is the processed dataset
 ADASYN_dataset <- ADASYN_rslt$data
