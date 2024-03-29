@@ -1,0 +1,105 @@
+---
+title: "Group 2 Data Balancing"
+format: html
+editor: Zeqianxi Xiao
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+requiring packages and read the data
+
+```{r}
+rm(list=ls())
+library(ROSE)
+library(openxlsx)
+
+setwd('C:/Users/zeqia/Desktop/Course Materials/Big Data/Group Assignment')
+data <- as.data.frame(read.xlsx('Group 2.xlsx', sheet = 'Group 2'))
+```
+
+data shape description
+
+```{r}
+dim(data)
+nrow(subset(data, data$`Bankrupt?` == '0'))
+nrow(subset(data, data$`Bankrupt?` == '1'))
+```
+
+change the colnames
+
+```{r}
+idx <- 1:95
+names(idx) <- paste0('x', idx)
+column_names <- c(names(idx))
+column_names <- c('y', column_names)
+colnames(data) <- column_names
+```
+
+Random Under Sampler and Random Over Sampler
+
+```{r}
+table(data$y)
+# Random Under Sampling
+RUS_rslt <- ovun.sample(formula = y ~ ., data = data, method = 'under')$data
+nrow(subset(RUS_rslt, RUS_rslt$y == '0'))
+nrow(subset(RUS_rslt, RUS_rslt$y == '1'))
+
+# Random Over Sampling
+ROS_rslt <- ovun.sample(formula = y ~ ., data = data, method = 'over')$data
+nrow(subset(ROS_rslt, ROS_rslt$y == '0'))
+nrow(subset(ROS_rslt, ROS_rslt$y == '1'))
+
+# Combined
+both_rslt <- ovun.sample(formula = y ~., data = data, method = 'both')$data
+nrow(subset(both_rslt, both_rslt$y == '0'))
+nrow(subset(both_rslt, both_rslt$y == '1'))
+```
+
+SCUT (SMOTE and Cluster-Based Undersampling Tech) (combine sampling)
+
+```{r}
+install.packages('scutr')
+library('scutr')
+```
+
+```{r}
+SMOTE_rslt <- SCUT(data = data, 'y', undersample = undersample_kmeans)  
+nrow(subset(SMOTE_rslt, SMOTE_rslt$y == '0'))
+nrow(subset(SMOTE_rslt, SMOTE_rslt$y == '1'))
+```
+
+ADASYN (oversampling)
+
+```{r}
+install.packages('smotefamily')
+library('smotefamily')
+```
+
+```{r}
+ADASYN_rslt <- ADAS(data, target = data$y, K = 3)
+
+#ADASYN_dataset is the processed dataset
+ADASYN_dataset <- ADASYN_rslt$data
+ADASYN_dataset <- subset(ADASYN_dataset, select = -class)
+nrow(subset(ADASYN_dataset, ADASYN_dataset$y == '0'))
+nrow(subset(ADASYN_dataset, ADASYN_dataset$y == '1'))
+```
