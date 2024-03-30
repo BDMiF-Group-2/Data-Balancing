@@ -4,6 +4,9 @@ Used under sampling and over sampling methods to handle with data imbalance.
 Over sampling is significantly recommended.
 ADASYN is more recommended since it reduces bias from synthetic data, comparing to SMOTE.
 
+The rebalanced-data.xlsx is the after augmented original dataset.
+The rebalanced-train-set.xlsx is the augmented train set. The train set is provided by Giulio.
+
 1.0 update:
   In order to find out an optimal K value for ADASYN (KNN based), an iteration from k = 1 to 80 was conducted with python.
   R has spent an hour to run an iteration of 10 and is yet finished.
