@@ -1,0 +1,111 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+library(caret)
+library(smotefamily)
+library(openxlsx)
+library(data.table)
+```
+
+```{r}
+set.seed(123)
+```
+
+```{r}
+# load datasets
+
+train = as.data.frame(read.csv("processed_train_final_v2_with_18_variables.csv"))
+test = as.data.frame(read.xlsx("selected_test.xlsx"))
+```
+
+```{r}
+# apply cross validation
+
+trControl <- trainControl(method = 'cv', number = 5)
+```
+
+```{r}
+# list of k values
+k <- seq(3, 73, by = 2)
+
+# empty list to store accuracy
+accuracy <- list()
+```
+
+```{r}
+# apply adasyn to train set and use svm to test the performance of changing k value
+
+for (i in 1:36) {
+  # apply adasyn and generate rebalanced train set
+  adasyn <- ADAS(train, target = train$y1, K = k[i])
+  adasyn_train <- subset(adasyn$data, select = -class)
+  
+  adasyn_train$y1 <- as.factor(adasyn_train$y1)
+  
+  # fit the rebalanced train set to svm model 
+  # all hyperparams are set default
+  model <- train(y1~ .,
+                 data = adasyn_train,
+                 trControl = trControl,
+                 method = "svmLinear",
+  )
+  
+  accuracy <- append(accuracy, model$results$Accuracy)
+}
+```
+
+```{r}
+# reshape the accuracy list into 2-cols data frame
+# col 1: k values
+# col 2: accuracy
+accuracy <- transpose(as.data.frame(accuracy))
+colnames(accuracy) <- "accuracy"
+k <- as.data.frame(k)
+colnames(k) <- "k value"
+accuracy <- cbind(k, accuracy)
+```
+
+```{r}
+plot(accuracy)
+```
+
+```{r}
+# k value of max accuracy
+accuracy$`k value`[which(accuracy$accuracy == max(accuracy$accuracy), arr.ind = T)]
+
+# max accuracy
+max(accuracy$accuracy)
+```
+
+```{r}
+# setting k = 13, generate and extract the train set
+optimal <- ADAS(train, target = train$y1, K = 13)
+optimal_train <- subset(optimal$data, select = -class)
+
+write.xlsx(optimal_train, file = "optimal train set.xlsx")
+```
