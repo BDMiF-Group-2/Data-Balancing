@@ -39,8 +39,8 @@ set.seed(123)
 ```{r}
 # load datasets
 
-train = as.data.frame(read.csv("processed_train_final_v2_with_18_variables.csv"))
-test = as.data.frame(read.xlsx("selected_test.xlsx"))
+train = as.data.frame(read.xlsx("C:/Users/zeqia/Desktop/train.xlsx"))
+test = as.data.frame(read.xlsx("C:/Users/zeqia/Desktop/Course Materials/Big Data/Group Assignment/selected_test.xlsx"))
 ```
 
 ```{r}
@@ -62,14 +62,14 @@ accuracy <- list()
 
 for (i in 1:36) {
   # apply adasyn and generate rebalanced train set
-  adasyn <- ADAS(train, target = train$y1, K = k[i])
+  adasyn <- ADAS(train, target = train$Bankrupt, K = k[i])
   adasyn_train <- subset(adasyn$data, select = -class)
   
-  adasyn_train$y1 <- as.factor(adasyn_train$y1)
+  adasyn_train$Bankrupt <- as.factor(adasyn_train$Bankrupt)
   
   # fit the rebalanced train set to svm model 
   # all hyperparams are set default
-  model <- train(y1~ .,
+  model <- train(Bankrupt ~ .,
                  data = adasyn_train,
                  trControl = trControl,
                  method = "svmLinear",
@@ -103,8 +103,8 @@ max(accuracy$accuracy)
 ```
 
 ```{r}
-# setting k = 13, generate and extract the train set
-optimal <- ADAS(train, target = train$y1, K = 13)
+# setting k = 47, generate and extract the train set
+optimal <- ADAS(train, target = train$Bankrupt, K = 47)
 optimal_train <- subset(optimal$data, select = -class)
 
 write.xlsx(optimal_train, file = "optimal train set.xlsx")
